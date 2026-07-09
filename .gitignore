@@ -1,25 +1,56 @@
-# RStudio
-*.Rproj.user
-*.Rhistory
-*.RData
-*.Ruserdata
+# R session files
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+.Rapp.history
 
-# Package build artifacts
+# Environment and credentials
+.Renviron
+.httr-oauth
+rsconnect/
+
+# Compiled code
+src/*.o
+src/*.so
+src/*.dll
+src/Makevars.local
+*.o
+*.so
+*.dll
+
+# Check and build output
+*.Rcheck/
+*.tar.gz
+/doc/
+/Meta/
+
+# Vignette and README build artifacts
 inst/doc
 vignettes/*.html
 vignettes/*.R
+*_cache/
+*_files/
+README.html
 
-# Development tools
-.claude/
+# pkgdown site
+docs/
+
+# Reverse dependency checks
+revdep/checks/
+revdep/library/
+revdep/data.sqlite
+
+# Development scratch space
+canvas/
 **/canvas/
+.claude/
 
 # Editors
 .vscode/
-
-# Temporary files
-*.tmp
 *.swp
 *~
+*.tmp
 
 # Operating system files
 .DS_Store
@@ -38,7 +69,6 @@ Thumbs.db
 # Archives
 *.zip
 *.tar
-*.tar.gz
 *.tgz
 *.7z
 *.gz
