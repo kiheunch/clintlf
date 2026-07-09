@@ -11,4 +11,4 @@
 ^README_files$
 ^docs$
 ^Meta$
-LICENSE.md
+^LICENSE\.md$
