@@ -1,0 +1,12 @@
+citHeader("To cite clintlf in publications use:")
+
+year <- if (is.null(meta$Date)) format(Sys.Date(), "%Y") else sub("-.*", "", meta$Date)
+
+bibentry(
+  bibtype = "Manual",
+  title   = "clintlf: Clinical Trial Table Listing and Figure Utilities",
+  author  = person("Ki Heun", "Chung"),
+  year    = year,
+  note    = paste0("R package version ", meta$Version),
+  url     = "https://github.com/kiheunch/clintlf"
+)

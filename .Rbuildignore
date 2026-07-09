@@ -1,0 +1,14 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^cran-comments\.md$
+^canvas$
+^[Tt][Oo][Dd][Oo]\.txt$
+^\.github$
+^\.claude$
+^\.DS_Store$
+^README\.Rmd$
+^README_cache$
+^README_files$
+^docs$
+^Meta$
+LICENSE.md

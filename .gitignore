@@ -1,0 +1,44 @@
+# RStudio
+*.Rproj.user
+*.Rhistory
+*.RData
+*.Ruserdata
+
+# Package build artifacts
+inst/doc
+vignettes/*.html
+vignettes/*.R
+
+# Development tools
+.claude/
+**/canvas/
+
+# Editors
+.vscode/
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# External data files
+*.xlsx
+*.xls
+*.xlsm
+*.sav
+*.dta
+*.xpt
+*.sas7bdat
+*.sas7bcat
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+*.gz

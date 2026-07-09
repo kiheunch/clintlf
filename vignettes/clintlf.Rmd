@@ -1,0 +1,239 @@
+---
+title: "Getting started with clintlf"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with clintlf}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(clintlf)
+```
+
+**clintlf** is a lightweight, standalone collection of formatting and data
+utilities for producing tables, listings, and figures (TLFs). Whether you work
+in base R, the tidyverse, or a proprietary pipeline, it integrates into
+existing workflows without tying you to a specific framework, package
+ecosystem, or dependency stack.
+
+This vignette walks through four functional areas:
+
+## 1. Table formatting
+
+### Half-away-from-zero rounding
+
+Base R rounds half to even (banker's rounding). Many clinical reporting
+conventions, as well as SAS `ROUND()`, use half-away-from-zero rounding.
+`fmt_round()` applies this behavior and returns a character vector with trailing
+zeros preserved, ready for table display.
+
+```{r}
+round(c(9.5, 10.5), 0)      # base R: half to even
+fmt_round(c(9.5, 10.5), 0)  # half away from zero
+
+fmt_round(c(2.5, 0.035, NA), c(0, 2, 2))
+```
+
+The function separates numerical rounding from display formatting, allowing
+numeric results to follow reporting conventions based on decimal-place
+specifications rather than significant figures.
+
+### Estimates with confidence intervals
+
+`fmt_ci()` combines a point estimate and its bounds into `"xx (xx, xx)"`,
+with independent decimal control for the estimate and the bounds.
+
+```{r}
+fmt_ci(3.14159, 1.23456, 5.67890)
+fmt_ci(3.14159, 1.23456, 5.67890, est_n = 2, ci_n = 1)
+```
+
+### Counts with percentages
+
+`fmt_percent()` formats `"xx (xx%)"`. When a positive count produces a
+percentage that rounds to zero, it substitutes a `"<"` threshold label so the
+table never claims a zero percentage for a non-zero count. A zero denominator
+prints `zero_denom` (default `"-"`) in place of the undefined percentage.
+
+```{r}
+fmt_percent(15, 100)
+fmt_percent(1, 1000, perc_n = 0)
+fmt_percent(1, 1000, perc_n = 1)
+fmt_percent(0, 0)
+```
+
+### P-values
+
+`fmt_pval()` displays values below a significance threshold as `"<alpha"` and
+rounds the rest half away from zero. Pass the threshold as a character string
+to preserve trailing zeros in the label.
+
+```{r}
+fmt_pval(c(0.051, 0.001), n = 3, alpha = "0.05")
+```
+
+## 2. Date imputation
+
+`impute_date()` imputes missing month and day components of partial date
+strings with varying structures, commonly encountered in international clinical
+datasets. It supports `"ymd"`, `"mdy"`, and `"dmy"` orderings, auto-detects
+separators, and strips time components before imputation.
+
+```{r}
+impute_date(c("2025-07-19", "2025-07", "2025", NA))
+impute_date(c("2025-07-19", "2025-07"), fill_month = "12", fill_day = "31")
+impute_date("2026-05-22T15:30:45")
+impute_date("07-19-2025", fmt = "mdy")
+```
+
+Out-of-range month or day components in the output trigger a warning, but
+calendar validity is not checked (custom fill values can intentionally create
+dates such as `"2025-02-31"`). Validate with `as.Date()` when calendar-valid
+dates are required.
+
+## 3. Data dictionary extraction
+
+`dict_param()` summarizes unique `PARAM` / `PARAMCD` / `PARAMN` combinations
+from ADaM datasets; `dict_label()` extracts variable label attributes as
+carried by CDISC datasets (e.g., read via `haven::read_xpt()`). Both accept a
+single data frame or a named list of data frames.
+
+```{r}
+adlb <- data.frame(
+  USUBJID = c("001", "001", "002", "002"),
+  PARAMCD = c("ALB", "ALB", "BILI", "BILI"),
+  PARAM   = c("Albumin (g/L)", "Albumin (g/L)",
+              "Bilirubin (umol/L)", "Bilirubin (umol/L)"),
+  PARAMN  = c(1L, 1L, 2L, 2L),
+  AVAL    = c(4.1, 4.2, 0.8, 0.9)
+)
+
+dict_param(adlb)
+```
+
+```{r}
+attr(adlb$USUBJID, "label") <- "Unique Subject Identifier"
+attr(adlb$AVAL,    "label") <- "Analysis Value"
+
+dict_label(adlb)
+```
+
+## 4. Multiple imputation pooling
+
+`calc_poolmi()` pools estimates and standard errors across imputed datasets
+using Rubin's rules, without requiring adoption of an entire multiple imputation
+framework. Supply the per-imputation estimates and standard errors directly as
+vectors, or as columns of a stacked data frame (one row per imputation).
+
+Two degrees-of-freedom methods are available: `df = "1987"` (Rubin, 1987;
+approximates the SAS `PROC MIANALYZE` default) and `df = "1999"` (Barnard and
+Rubin, 1999; approximates `mice::pool()` and `PROC MIANALYZE` with EDF).
+
+```{r}
+calc_poolmi(est = c(-2.57, -2.11, -1.85, -2.07, -2.13),
+            se  = c( 1.05,  0.91,  0.92,  0.85,  0.90))
+```
+
+The same pooled results are obtained from a stacked analysis-results data
+frame:
+
+```{r}
+imp_result <- data.frame(
+  IMPNO = 1:5,
+  est   = c(-2.57, -2.11, -1.85, -2.07, -2.13),
+  SE    = c( 1.05,  0.91,  0.92,  0.85,  0.90)
+)
+
+calc_poolmi(est = "est", se = "SE", data = imp_result)
+```
+
+### From a stacked imputed dataset
+
+In practice, the per-imputation results come from fitting the same model in
+each imputed dataset. Clinical MI datasets are typically stacked, with an
+`IMPNO` column identifying the imputation. To keep this example runnable, the
+"imputations" below are simulated by adding noise to the missing outcomes:
+
+```{r}
+set.seed(18210)
+subj <- data.frame(
+  USUBJID = sprintf("SUBJ-%03d", 1:60),
+  TRTP    = factor(rep(c("Placebo", "Drug"), each = 30),
+                   levels = c("Placebo", "Drug")),
+  BASE    = round(rnorm(60, 25, 4), 1)
+)
+subj$CHG <- -1 - 2 * (subj$TRTP == "Drug") + rnorm(60, 0, 3)
+miss <- sample(60, 12)   # subjects with a missing outcome
+
+admi <- do.call(rbind, lapply(1:5, function(m) {
+  imp <- subj
+  imp$CHG[miss] <- imp$CHG[miss] + rnorm(length(miss), 0, 2)
+  cbind(IMPNO = m, imp)
+}))
+```
+
+Split by imputation, fit a baseline-adjusted ANCOVA in each, and stack the
+treatment effect and its standard error — one row per imputation:
+
+```{r}
+admi_list <- split(admi, admi$IMPNO)
+
+model_results <- do.call(rbind, lapply(admi_list, function(dat) {
+  coefs <- summary(lm(CHG ~ BASE + TRTP, data = dat))$coefficients
+  data.frame(est = coefs["TRTPDrug", "Estimate"],
+             SE  = coefs["TRTPDrug", "Std. Error"])
+}))
+
+calc_poolmi(est = "est", se = "SE", data = model_results)
+```
+
+Any model — mixed models included — slots into the same pattern, as long as
+each imputation-specific fit supplies an estimate and its standard error.
+
+### Cross-check against mice
+
+`calc_poolmi()` with `df = "1999"` reproduces `mice::pool()`:
+
+```{r, eval = requireNamespace("mice", quietly = TRUE)}
+imp <- mice::mice(mice::nhanes, m = 5, print = FALSE, seed = 18210)
+fit <- with(data = imp, lm(bmi ~ age))
+
+summary(mice::pool(fit), conf.int = TRUE)[2, ]
+
+est_se <- do.call(rbind, lapply(fit$analyses, function(model) {
+  coefs <- summary(model)$coefficients
+  data.frame(est = coefs["age", "Estimate"],
+             SE  = coefs["age", "Std. Error"])
+}))
+
+calc_poolmi(est = "est", se = "SE", data = est_se,
+            df = "1999", n = nrow(mice::nhanes), k = 2)
+```
+
+The equivalent SAS calls, given the same stacked dataset:
+
+```
+PROC MIANALYZE DATA = est_se;            /* df = "1987" */
+  MODELEFFECTS est;
+  STDERR SE;
+RUN;
+
+PROC MIANALYZE DATA = est_se EDF = 23;   /* df = "1999", EDF = n - k */
+  MODELEFFECTS est;
+  STDERR SE;
+RUN;
+```
+
+## References
+
+- Rubin, D.B. (1987). *Multiple Imputation for Nonresponse in Surveys*. Wiley.
+- Barnard, J. and Rubin, D.B. (1999). Small-sample degrees of freedom with
+  multiple imputation. *Biometrika*, 86(4), 948-955.
