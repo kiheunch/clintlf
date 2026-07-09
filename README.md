@@ -3,9 +3,8 @@
 > **Clin**ical Trial **T**able, **L**isting, and **F**igure Utilities
 
 <!-- badges: start -->
-<!-- [![CRAN status](https://www.r-pkg.org/badges/version/clintlf)](https://cran.r-project.org/package=clintlf) -->
+[![CRAN status](https://www.r-pkg.org/badges/version/clintlf)](https://cran.r-project.org/package=clintlf)
 [![R-CMD-check](https://github.com/kiheunch/clintlf/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/kiheunch/clintlf/actions/workflows/R-CMD-check.yaml)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
 **clintlf** is a lightweight, standalone collection of formatting and data
