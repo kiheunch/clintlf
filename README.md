@@ -48,7 +48,7 @@ install.packages("clintlf")
 **clintlf** is organized into four functional areas:
 
 1. [Table Formatting](#1-table-formatting)
-2. [Date Imputation](#2-date-imputation)
+2. [Data Preparation](#2-data-preparation)
 3. [ADaM Metadata Extraction](#3-adam-metadata-extraction)
 4. [Framework-free Calculation](#4-framework-free-calculation)
 
@@ -139,7 +139,7 @@ fmt_pval(c(0.051, 0.001), n = 3, alpha = c("0.05", "0.10"))
 
 ---
 
-## 2. Date Imputation
+## 2. Data Preparation
 
 ### `impute_date()` — Impute partial dates to `yyyy-mm-dd`
 
