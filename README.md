@@ -21,7 +21,6 @@ may find it just as useful for reproducible reporting. It covers:
 * Confidence intervals (`"xx (xx, xx)"`), percentages (`"xx (xx%)"`), and p-values (`"<xx"`) formatted for table cells
 * Partial date imputation across the formats and separators found in international clinical datasets
 * PARAM metadata and variable label extraction from ADaM/CDISC datasets
-* Multiple imputation pooling by Rubin's rules, consistent with SAS `PROC MIANALYZE` and R `mice`, accepting estimates and standard errors from any model without requiring adoption of an entire multiple imputation framework
 
 ---
 
@@ -44,12 +43,11 @@ install.packages("clintlf")
 
 ## Overview
 
-**clintlf** is organized into four functional areas:
+**clintlf** is organized into three functional areas:
 
 1. [Table Formatting](#1-table-formatting)
 2. [Data Preparation](#2-data-preparation)
 3. [ADaM Metadata Extraction](#3-adam-metadata-extraction)
-4. [Framework-free Calculation](#4-framework-free-calculation)
 
 ---
 
@@ -227,85 +225,6 @@ dict_label(list(adsl = read_xpt("adsl.xpt"),
 
 ---
 
-## 4. Framework-free Calculation
-
-### `calc_poolmi()` — Pool multiple imputation analysis results using Rubin's rules
-
-Multiple imputation pooling via Rubin's rules, numerically consistent with SAS PROC MIANALYZE and R mice, 
-accepting estimates and standard errors directly from any model without requiring adoption of an entire 
-multiple imputation framework. Supply the per-imputation estimates and standard errors directly as
-vectors, or as columns of a stacked data frame (one row per imputation).
-
-It is particularly useful in workflows where a model is fitted across a list of imputed datasets and results are stacked into a single data frame,
-one row per imputation, before pooling. Two degrees-of-freedom methods are supported: 
-
-| `df` argument | Method | Approximates |
-|---|---|---|
-| `"1987"` (default) | Rubin (1987) | SAS `PROC MIANALYZE` default |
-| `"1999"` | Barnard & Rubin (1999) | R `mice::pool()` or SAS `PROC MIANALYZE` with EDF |
-
-```r
-# Vectors of estimates and standard errors across 5 imputed datasets
-calc_poolmi(est = c(-2.57, -2.11, -1.85, -2.07, -2.13),
-            se  = c( 1.05,  0.91,  0.92,  0.85,  0.90))
-#>   pool.est   pool.se     lower      upper      p.val
-#> 1   -2.146 0.9717592 -4.055013 -0.2369871 0.02765002
-
-# Or stacked into a data frame, one row per imputation
-imp_result <- data.frame(
-  IMPNO = 1:5,
-  est   = c(-2.57, -2.11, -1.85, -2.07, -2.13),
-  SE    = c( 1.05,  0.91,  0.92,  0.85,  0.90)
-)
-
-# Pool using Rubin (1987)
-calc_poolmi(est = "est", se = "SE", data = imp_result)
-#>   pool.est   pool.se     lower      upper      p.val
-#> 1   -2.146 0.9717592 -4.055013 -0.2369871 0.02765002
-```
-
-#### Pooling results from independently fitted models
-
-In practice, the estimates come from a model fitted once per imputed dataset.
-Assume `admi` is a stacked, multiply imputed analysis dataset — one row per
-subject per visit, with `IMPNO` identifying the imputation. Split it into one
-data frame per imputation:
-
-```r
-admi_list <- split(admi, admi$IMPNO)
-```
-
-Fit the same model within each imputation and keep the estimate and standard
-error of the effect of interest. Mixed models are the usual choice for
-longitudinal endpoints, but for simplicity, `lm()` is used:
-
-```r
-model_results <- do.call(rbind, lapply(admi_list, function(dat) {
-  wk24  <- subset(dat, AVISIT == "Week 24")
-  coefs <- summary(lm(CHG ~ BASE + TRTP, data = wk24))$coefficients
-  data.frame(est = coefs["TRTPDrug", "Estimate"],
-             SE  = coefs["TRTPDrug", "Std. Error"])
-}))
-```
-
-`model_results` now holds one row per imputation, ready to pool:
-
-```r
-calc_poolmi(est = "est", se = "SE", data = model_results)
-```
-
-Any model — mixed models included — slots into the same pattern, as long as
-each imputation-specific fit supplies an estimate and its standard error.
-
-
-**References:**
-
-- Rubin, D.B. (1987). *Multiple Imputation for Nonresponse in Surveys*. Wiley.
-- Barnard, J. and Rubin, D.B. (1999). Small-sample degrees of freedom with
-  multiple imputation. *Biometrika*, 86(4), 948-955.
-
----
-
 ## Function Reference
 
 | Function | Area | Description |
@@ -317,7 +236,6 @@ each imputation-specific fit supplies an estimate and its standard error.
 | `impute_date()` | Data Preparation | Impute partial dates to `yyyy-mm-dd` character format |
 | `dict_param()` | Data Dictionary | Extract `PARAM`/`PARAMCD`/`PARAMN` metadata from ADaM datasets |
 | `dict_label()` | Data Dictionary | Extract column label attributes from CDISC datasets |
-| `calc_poolmi()` | Calculation | Pool estimates across imputations via Rubin's rules |
 
 ---
 

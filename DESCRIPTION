@@ -7,9 +7,7 @@ Description: Provides lightweight, standalone utility functions for preparing
     and formatting clinical reporting outputs, including tables, listings, and
     figures (TLFs). The package does not impose any specific framework,
     package ecosystem, or dependency stack, allowing integration across a wide
-    range of R workflows. Includes multiple imputation pooling following Rubin
-    (1987) <doi:10.1002/9780470316696> and Barnard and Rubin (1999)
-    <doi:10.1093/biomet/86.4.948>.
+    range of R workflows.
 License: MIT + file LICENSE
 URL: https://github.com/kiheunch/clintlf
 BugReports: https://github.com/kiheunch/clintlf/issues
@@ -20,11 +18,8 @@ Roxygen: list(markdown = TRUE)
 Suggests:
     haven,
     knitr,
-    mice,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
-Imports:
-    stats
