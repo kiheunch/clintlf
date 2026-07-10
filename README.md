@@ -76,22 +76,39 @@ fmt_round(c(2.5, 0.035, NA), c(0, 2, 2))
 #> [1] "3"    "0.04" "NA"
 ```
 
-### `fmt_ci()` — Estimate with confidence interval
+### `fmt_stat()` — Descriptive statistics cells
 
-Combines a point estimate and its confidence interval bounds into a single
-string (`"xx (xx, xx)"`), with independent decimal place control for the
-estimate and bounds.
+One builder for summary cells: a lead value followed by a bracketed group
+(`"xx (xx, xx)"`), with independent decimal control for each part. Mean (SD),
+median (Q1, Q3), an estimate with its confidence bounds, and min, max all
+come from the same call.
 
 ```r
-fmt_ci(3.14159, 1.23456, 5.67890)
+fmt_stat(23.456, 4.5678, inner_n = 2)                    # mean (SD)
+#> [1] "23.5 (4.57)"
+
+fmt_stat(5.678, 2.345, 8.901)                            # median (Q1, Q3)
+#> [1] "5.7 (2.3, 8.9)"
+
+fmt_stat(3.14159, 1.23456, 5.6789, n = 2, inner_n = 2)   # estimate (95% CI)
 #> [1] "3.14 (1.23, 5.68)"
 
-fmt_ci(3.14159, 1.23456, 5.67890, est_n = 2, ci_n = 1)
-#> [1] "3.14 (1.2, 5.7)"
+fmt_stat(NULL, 0.123, 9.876, bracket = "")               # min, max
+#> [1] "0.1, 9.9"
 
-# Vectorised
-fmt_ci(c(1.111, 2.222), c(0.500, 1.500), c(1.700, 2.900))
-#> [1] "1.11 (0.50, 1.70)" "2.22 (1.50, 2.90)"
+# NA replacement, e.g. the SD of a single observation
+fmt_stat(c(12.3, 15.8), c(4.56, NA), na = "-")
+#> [1] "12.3 (4.6)" "15.8 (-)"
+```
+
+Since it is vectorized, it can be used in functions like `dplyr::mutate()`:
+
+```r
+results %>%
+  mutate(output = fmt_stat(estimate, lowerci, upperci, n = 2, inner_n = 2))
+#>   estimate lowerci upperci            output
+#> 1    1.234   0.512   2.099 1.23 (0.51, 2.10)
+#> 2    5.678   4.444   6.912 5.68 (4.44, 6.91)
 ```
 
 ### `fmt_percent()` — Value with percentage
@@ -230,7 +247,7 @@ dict_label(list(adsl = read_xpt("adsl.xpt"),
 | Function | Area | Description |
 |---|---|---|
 | `fmt_round()` | Formatting | Half-away-from-zero rounding with character output |
-| `fmt_ci()` | Formatting | Estimate with confidence interval — `"xx (xx, xx)"` |
+| `fmt_stat()` | Formatting | Descriptive statistics cells — `"xx (xx, xx)"` |
 | `fmt_percent()` | Formatting | Value with percentage — `"xx (xx%)"` |
 | `fmt_pval()` | Formatting | P-value with significance threshold label |
 | `impute_date()` | Data Preparation | Impute partial dates to `yyyy-mm-dd` character format |

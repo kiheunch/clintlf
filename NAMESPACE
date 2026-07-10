@@ -2,8 +2,8 @@
 
 export(dict_label)
 export(dict_param)
-export(fmt_ci)
 export(fmt_percent)
 export(fmt_pval)
 export(fmt_round)
+export(fmt_stat)
 export(impute_date)

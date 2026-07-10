@@ -46,14 +46,18 @@ The function separates numerical rounding from display formatting, allowing
 numeric results to follow reporting conventions based on decimal-place
 specifications rather than significant figures.
 
-### Estimates with confidence intervals
+### Descriptive statistics cells
 
-`fmt_ci()` combines a point estimate and its bounds into `"xx (xx, xx)"`,
-with independent decimal control for the estimate and the bounds.
+`fmt_stat()` builds the usual summary cells from a lead value and a bracketed
+group, with independent decimal control for each part: mean (SD), median
+(Q1, Q3), an estimate with its bounds, or min, max with no lead. The `na`
+text stands in for a missing value, such as the SD of a single observation.
 
 ```{r}
-fmt_ci(3.14159, 1.23456, 5.67890)
-fmt_ci(3.14159, 1.23456, 5.67890, est_n = 2, ci_n = 1)
+fmt_stat(23.456, 4.5678, inner_n = 2)                    # mean (SD)
+fmt_stat(3.14159, 1.23456, 5.6789, n = 2, inner_n = 2)   # estimate (95% CI)
+fmt_stat(NULL, 0.123, 9.876, bracket = "")               # min, max
+fmt_stat(c(12.3, 15.8), c(4.56, NA), na = "-")
 ```
 
 ### Counts with percentages
