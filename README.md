@@ -13,14 +13,27 @@ in base R, the tidyverse, or a proprietary pipeline, it integrates into
 existing workflows without tying you to a specific framework, package
 ecosystem, or dependency stack.
 
+A full-featured framework may be a powerful tool once an organization manages to
+adopt the ecosystem end-to-end, but that same structure becomes overhead everywhere short of full, rigorous commitment, and each one
+comes with its own learning curve. This package aims to be introducible
+anywhere in an existing workflow, free from the operational considerations
+that come with maintaining long-term reproducibility, while tackling the common pain point in R.
+
+**clintlf** follows the following philosophy:
+
+* No class hierarchy to construct and no framework to adopt, just plain functions so return values slot into any workflow
+* Dependencies limited to base R and default-installation packages
+* Constraints that are meaningful and informative, catching unintended coercion or unexpected input instead of passing it through
+* Vectorized wherever the operation allows it
+
 While developed for clinical trial reporting, colleagues in other domains
 may find it just as useful for reproducible reporting. It covers:
 
-* Half-away-from-zero (commercial) rounding that handles floating-point representation issues
+* Half-away-from-zero rounding that handles floating-point representation issues
 * Display-ready character output for numeric results using decimal-place specifications rather than significant figures
-* Confidence intervals (`"xx (xx, xx)"`), percentages (`"xx (xx%)"`), and p-values (`"<xx"`) formatted for table cells
-* Partial date imputation across the formats and separators found in international clinical datasets
-* PARAM metadata and variable label extraction from ADaM/CDISC datasets
+* Common formatting like confidence intervals (`"xx (xx, xx)"`), percentages (`"xx (xx%)"`), and p-values (`"<xx"`) for table cells
+* Partial date imputation across the international formats and separators
+* Label extraction from datasets for data dictionary
 
 ---
 
@@ -246,10 +259,10 @@ dict_label(list(adsl = read_xpt("adsl.xpt"),
 
 | Function | Area | Description |
 |---|---|---|
-| `fmt_round()` | Formatting | Half-away-from-zero rounding with character output |
-| `fmt_stat()` | Formatting | Descriptive statistics cells — `"xx (xx, xx)"` |
-| `fmt_percent()` | Formatting | Value with percentage — `"xx (xx%)"` |
-| `fmt_pval()` | Formatting | P-value with significance threshold label |
+| `fmt_round()` | Table Formatting | Half-away-from-zero rounding with character output |
+| `fmt_stat()` | Table Formatting | Descriptive statistics cells — `"xx (xx, xx)"` |
+| `fmt_percent()` | Table Formatting | Value with percentage — `"xx (xx%)"` |
+| `fmt_pval()` | Table Formatting | P-value with significance threshold label |
 | `impute_date()` | Data Preparation | Impute partial dates to `yyyy-mm-dd` character format |
 | `dict_param()` | Data Dictionary | Extract `PARAM`/`PARAMCD`/`PARAMN` metadata from ADaM datasets |
 | `dict_label()` | Data Dictionary | Extract column label attributes from CDISC datasets |
