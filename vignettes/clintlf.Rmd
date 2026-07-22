@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 library(clintlf)
 ```
 
-**clintlf** is a lightweight, standalone collection of formatting and data
+**clintlf** is a small, dependency-free collection of formatting and data
 utilities for producing tables, listings, and figures (TLFs). Whether you work
 in base R, the tidyverse, or a proprietary pipeline, it integrates into
 existing workflows without tying you to a specific framework, package
@@ -30,10 +30,10 @@ This vignette walks through three functional areas:
 
 ### Half-away-from-zero rounding
 
-Base R rounds half to even (banker's rounding). Many clinical reporting
-conventions, as well as SAS `ROUND()`, use half-away-from-zero rounding.
-`fmt_round()` applies this behavior and returns a character vector with trailing
-zeros preserved, ready for table display.
+Base R rounds half to even (banker's rounding), while most clinical reporting
+conventions use half-away-from-zero rounding. `fmt_round()` applies this
+behavior and returns a character vector with trailing zeros preserved, ready
+for table display.
 
 ```{r}
 round(c(9.5, 10.5), 0)      # base R: half to even
@@ -42,16 +42,16 @@ fmt_round(c(9.5, 10.5), 0)  # half away from zero
 fmt_round(c(2.5, 0.035, NA), c(0, 2, 2))
 ```
 
-The function separates numerical rounding from display formatting, allowing
-numeric results to follow reporting conventions based on decimal-place
-specifications rather than significant figures.
+Rounding and display are one step here: you specify decimal places, not
+significant figures, and get back a string that already reads the way the table
+should.
 
 ### Descriptive statistics cells
 
 `fmt_stat()` builds the usual summary cells from a lead value and a bracketed
-group, with independent decimal control for each part: mean (SD), median
-(Q1, Q3), an estimate with its bounds, or min, max with no lead. The `na`
-text stands in for a missing value, such as the SD of a single observation.
+group: mean (SD), median (Q1, Q3), an estimate with its bounds, or min, max with
+no lead. The lead and the bracketed part round independently. The `na` text
+stands in for a missing value, like the SD of a single observation.
 
 ```{r}
 fmt_stat(23.456, 4.5678, inner_n = 2)                    # mean (SD)
@@ -63,10 +63,10 @@ fmt_stat(c(12.3, 15.8), c(4.56, NA), na = "-")
 
 ### Counts with percentages
 
-`fmt_percent()` formats `"xx (xx%)"`. When a positive count produces a
-percentage that rounds to zero, it substitutes a `"<"` threshold label so the
-table never claims a zero percentage for a non-zero count. A zero denominator
-prints `zero_denom` (default `"-"`) in place of the undefined percentage.
+`fmt_percent()` formats `"xx (xx%)"`. If a positive count rounds to 0%, it
+switches to a `"<"` threshold label so the cell doesn't read as zero when the
+count isn't. A zero denominator leaves the percentage undefined, so those cells
+print `zero_denom` (default `"-"`).
 
 ```{r}
 fmt_percent(15, 100)
@@ -87,13 +87,12 @@ fmt_pval(c(0.051, 0.001), n = 3, alpha = "0.05")
 
 ## 2. Date imputation
 
-`impute_date()` imputes missing month and day components of partial date
-strings with varying structures, commonly encountered in international clinical
-datasets. It supports `"ymd"`, `"mdy"`, and `"dmy"` orderings, auto-detects
-separators, and strips time components before imputation. By default a missing
-month fills to `"12"` and a missing day fills to the last day of the resolved
-month (the end-of-period convention); pass `fill_month = "01"`, `fill_day = "01"`
-for the earliest-date convention.
+`impute_date()` fills the missing month and day of partial date strings, the
+kind that turn up in international clinical data. It handles `"ymd"`, `"mdy"`,
+and `"dmy"` orderings, auto-detects the separator, and strips any time component
+first. By default a missing month fills to `"12"` and a missing day to the last
+day of the resolved month (the end-of-period convention); pass
+`fill_month = "01"`, `fill_day = "01"` for the earliest-date convention.
 
 ```{r}
 impute_date(c("2025-07-19", "2025-07", "2025", NA))

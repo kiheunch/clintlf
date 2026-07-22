@@ -1,9 +1,9 @@
 #' Format a descriptive statistics cell
 #'
-#' The general cell builder: a lead value followed by a bracketed group,
-#' `"x (a, b)"`, rounding half away from zero. One function covers the usual
-#' summary cells: `estimate (LowerCI, UpperCI)`, `mean (SD)`,
-#' `median (Q1, Q3)`, or `min, max` with no lead and no brackets. Without user manualling going through tedious string concatenation.
+#' Builds a lead value followed by a bracketed group, `"x (a, b)"`, rounding
+#' half away from zero. One call covers the usual summary cells:
+#' `estimate (LowerCI, UpperCI)`, `mean (SD)`, `median (Q1, Q3)`, or `min, max`
+#' with no lead and no brackets, saving the tedious string concatenation by hand.
 #'
 #' @param x Lead value shown before the brackets. Numeric or character
 #'   coercible to numeric; `NULL` for a cell with no lead such as

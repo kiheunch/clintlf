@@ -44,10 +44,10 @@ Default \code{TRUE}.}
 Character vector, one cell per element, e.g. \code{"23.5 (4.57)"}.
 }
 \description{
-The general cell builder: a lead value followed by a bracketed group,
-\code{"x (a, b)"}, rounding half away from zero. One function covers the usual
-summary cells: \code{estimate (LowerCI, UpperCI)}, \code{mean (SD)},
-\code{median (Q1, Q3)}, or \verb{min, max} with no lead and no brackets. Without user manualling going through tedious string concatenation.
+Builds a lead value followed by a bracketed group, \code{"x (a, b)"}, rounding
+half away from zero. One call covers the usual summary cells:
+\code{estimate (LowerCI, UpperCI)}, \code{mean (SD)}, \code{median (Q1, Q3)}, or \verb{min, max}
+with no lead and no brackets, saving the tedious string concatenation by hand.
 }
 \examples{
 fmt_stat(3.14159, 1.23456, 5.6789, n = 2, inner_n = 2)  # estimate (95\% CI): "3.14 (1.23, 5.68)"
