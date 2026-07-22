@@ -18,8 +18,20 @@ test_that("fmt_stat: min, max cell with no lead and no brackets", {
   expect_equal(fmt_stat(NULL, 0.123, 9.876, bracket = ""), "0.1, 9.9")
 })
 
+test_that("fmt_stat: adaptive default drops brackets when x is NULL", {
+  expect_equal(fmt_stat(NULL, 0.123, 9.876), "0.1, 9.9")
+})
+
+test_that("fmt_stat: adaptive default adds parens when x is supplied", {
+  expect_equal(fmt_stat(5.678, 2.345, 8.901), "5.7 (2.3, 8.9)")
+})
+
 test_that("fmt_stat: square brackets", {
-  expect_equal(fmt_stat(1.5, 0.5, 2.5, bracket = "["), "1.5 [0.5, 2.5]")
+  expect_equal(fmt_stat(1.5, 0.5, 2.5, bracket = "[]"), "1.5 [0.5, 2.5]")
+})
+
+test_that("fmt_stat: asymmetric bracket for inclusive/exclusive range", {
+  expect_equal(fmt_stat(1, 0.5, 2.5, bracket = "(]"), "1.0 (0.5, 2.5]")
 })
 
 test_that("fmt_stat: custom separator", {
@@ -76,22 +88,23 @@ test_that("fmt_stat: non-coercible character throws for a bracketed vector", {
 
 # --- missing values ------------------------------------------------------------
 
-test_that("fmt_stat: NA formats as NA by default", {
-  expect_equal(fmt_stat(NA, NA, NA), "NA (NA, NA)")
-  expect_equal(fmt_stat(0.2, NA_real_, 0.5, n = 2, inner_n = 2), "0.20 (NA, 0.50)")
-  expect_equal(fmt_stat(NA_character_, NA_character_), "NA (NA)")
+test_that("fmt_stat: NA formats as the default na text", {
+  expect_equal(fmt_stat(NA, NA, NA), "- (-, -)")
+  expect_equal(fmt_stat(0.2, NA_real_, 0.5, n = 2, inner_n = 2), "0.20 (-, 0.50)")
+  expect_equal(fmt_stat(NA_character_, NA_character_), "- (-)")
 })
 
 test_that("fmt_stat: vectorized input with NA element", {
   expect_equal(
     fmt_stat(c(1.111, NA), c(0.500, NA), c(1.700, NA), n = 2, inner_n = 2),
-    c("1.11 (0.50, 1.70)", "NA (NA, NA)")
+    c("1.11 (0.50, 1.70)", "- (-, -)")
   )
 })
 
-test_that("fmt_stat: na text replaces NA and NaN", {
-  expect_equal(fmt_stat(c(12.3, 15.8), c(4.56, NA), na = "-"), c("12.3 (4.6)", "15.8 (-)"))
-  expect_equal(fmt_stat(NaN, 1, na = "-"), "- (1.0)")
+test_that("fmt_stat: na text is configurable and replaces NA and NaN", {
+  expect_equal(fmt_stat(c(12.3, 15.8), c(4.56, NA)), c("12.3 (4.6)", "15.8 (-)"))
+  expect_equal(fmt_stat(NaN, 1), "- (1.0)")
+  expect_equal(fmt_stat(NA, NA, na = "NA"), "NA (NA)")
 })
 
 # --- input validation ----------------------------------------------------------
@@ -122,6 +135,7 @@ test_that("fmt_stat: error on bad n or inner_n", {
   expect_error(fmt_stat(1, 2, inner_n = -1), "inner_n must be a non-negative integer scalar")
 })
 
-test_that("fmt_stat: error on unknown bracket", {
+test_that("fmt_stat: error on bracket of wrong length", {
   expect_error(fmt_stat(1, 2, bracket = "{"), "bracket must be")
+  expect_error(fmt_stat(1, 2, bracket = "()x"), "bracket must be")
 })

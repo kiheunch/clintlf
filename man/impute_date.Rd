@@ -31,7 +31,7 @@ fixed day instead.}
 Auto-detected per element when \code{NULL} (default).}
 }
 \value{
-Character vector of complete yyyy-mm-dd dates.
+Character vector of complete ISO 8601 (yyyy-mm-dd) dates.
 }
 \description{
 Fills in missing month and day components of partial date strings.
@@ -49,6 +49,6 @@ required.
 impute_date(c("2025-07-19", "2025-07", "2025", NA))  # last day / month filled
 impute_date("2025", fill_month = "01", fill_day = "01")  # earliest convention
 impute_date("2025/07")                  # separator auto-detected
-impute_date("07-19-2025", fmt = "mdy")
+impute_date("07-19-2025", fmt = "mdy")  # mdy ordering input
 impute_date("2026-05-22T15:30:45")      # time stripped
 }

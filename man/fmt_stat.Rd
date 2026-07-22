@@ -9,7 +9,7 @@ fmt_stat(
   ...,
   n = 1L,
   inner_n = 1L,
-  bracket = "(",
+  bracket = NULL,
   sep = ", ",
   na = "-",
   eps = TRUE
@@ -27,10 +27,12 @@ each the same length as \code{x}. Numeric or character coercible to numeric.}
 
 \item{inner_n}{Decimal places for the bracketed values. Default \code{1}.}
 
-\item{bracket}{Opening bracket: \code{"("}, \code{"["}, or \code{""} for none. The
-closing bracket follows. Default \code{"("}.
-#FIXME: dont make it match.arg, Allow either empty character or two characters, e.g., "()" or "(]" so it can be used for inclusive/exclusive range.
-Perhaps default is NULL which does () when there is \code{x}, and "" when there is not.  But user can provide "()" or "" or even "(]"}
+\item{bracket}{Open and close characters as a single two-character string,
+e.g. \code{"()"}, \code{"[]"}, or \code{"(]"} for an inclusive/exclusive range; \code{""} for
+none. Default \code{NULL} resolves to \code{"()"} when \code{x} is supplied and \code{""}
+otherwise (the \verb{min, max} case).}
+
+\item{sep}{Separator between bracketed values. Default \code{", "}.}
 
 \item{na}{Shown in place of a missing value, e.g. \code{"-"} for the SD of a
 single observation. \code{NaN} displays the same way. Default \code{"-"}.}
@@ -48,10 +50,11 @@ summary cells: \code{estimate (LowerCI, UpperCI)}, \code{mean (SD)},
 \code{median (Q1, Q3)}, or \verb{min, max} with no lead and no brackets. Without user manualling going through tedious string concatenation.
 }
 \examples{
-fmt_stat(3.14159, 1.23456, 5.6789, n = 2, inner_n = 2)   # estimate (95\% CI): "3.14 (1.23, 5.68)"
-fmt_stat(23.456, 4.5678,         , n = 1, inner_n = 2)   # mean (SD):         "23.5 (4.57)" 
-fmt_stat(NULL, 0.123, 9.876)                             # min, max:          "0.1, 9.8"
-fmt_stat(c(12.3, 15.8), c(4.56, NA))                     # vectorized:        "12.3 (4.6)" "15.8 (-)"
+fmt_stat(3.14159, 1.23456, 5.6789, n = 2, inner_n = 2)  # estimate (95\% CI): "3.14 (1.23, 5.68)"
+fmt_stat(23.456, 4.5678          , n = 1, inner_n = 2)  # mean (SD):         "23.5 (4.57)" 
+fmt_stat(NULL, 0.123, 9.876)                            # min, max:          "0.1, 9.9"
+fmt_stat(1, 0.5, 2.5, bracket = "(]")                   # bracket:           "1.0 (0.5, 2.5]"
+fmt_stat(c(12.3, 15.8), c(4.56, NA))                    # vectorized:        "12.3 (4.6)" "15.8 (-)"
 }
 \seealso{
 \code{\link[=fmt_round]{fmt_round()}}
