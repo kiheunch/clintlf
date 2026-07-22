@@ -3,7 +3,7 @@
 #' The general cell builder: a lead value followed by a bracketed group,
 #' `"x (a, b)"`, rounding half away from zero. One function covers the usual
 #' summary cells: `estimate (LowerCI, UpperCI)`, `mean (SD)`,
-#' `median (Q1, Q3)`, or `min, max` with no lead and no brackets.
+#' `median (Q1, Q3)`, or `min, max` with no lead and no brackets. Without user manualling going through tedious string concatenation.
 #'
 #' @param x Lead value shown before the brackets. Numeric or character
 #'   coercible to numeric; `NULL` for a cell with no lead such as
@@ -13,24 +13,24 @@
 #' @param n Decimal places for the lead. Default `1`.
 #' @param inner_n Decimal places for the bracketed values. Default `1`.
 #' @param bracket Opening bracket: `"("`, `"["`, or `""` for none. The
-#'   closing bracket follows. Default `"("`.
-#' @param sep Separator between bracketed values. Default `", "`.
+#'   closing bracket follows. Default `"("`.   
+#' #FIXME: dont make it match.arg, Allow either empty character or two characters, e.g., "()" or "(]" so it can be used for inclusive/exclusive range. 
+#' Perhaps default is NULL which does () when there is `x`, and "" when there is not.  But user can provide "()" or "" or even "(]"
 #' @param na Shown in place of a missing value, e.g. `"-"` for the SD of a
-#'   single observation. `NaN` displays the same way. Default `"NA"`.
+#'   single observation. `NaN` displays the same way. Default `"-"`.
 #' @param eps Apply the floating-point correction of [fmt_round()].
 #'   Default `TRUE`.
 #' @returns Character vector, one cell per element, e.g. `"23.5 (4.57)"`.
 #' @seealso [fmt_round()]
 #' @export
 #' @examples
-#' fmt_stat(23.456, 4.5678, inner_n = 2)                    # mean (SD)
-#' fmt_stat(5.678, 2.345, 8.901)                            # median (Q1, Q3)
-#' fmt_stat(3.14159, 1.23456, 5.6789, n = 2, inner_n = 2)   # estimate (95% CI)
-#' fmt_stat(NULL, 0.123, 9.876, bracket = "")               # min, max
-#' fmt_stat(c(12.3, 15.8), c(4.56, NA), na = "-")           # SD missing for n = 1
+#' fmt_stat(3.14159, 1.23456, 5.6789, n = 2, inner_n = 2)   # estimate (95% CI): "3.14 (1.23, 5.68)"
+#' fmt_stat(23.456, 4.5678,         , n = 1, inner_n = 2)   # mean (SD):         "23.5 (4.57)" 
+#' fmt_stat(NULL, 0.123, 9.876)                             # min, max:          "0.1, 9.8"
+#' fmt_stat(c(12.3, 15.8), c(4.56, NA))                     # vectorized:        "12.3 (4.6)" "15.8 (-)"
 
 fmt_stat <- function(x = NULL, ..., n = 1L, inner_n = 1L, bracket = "(",
-                     sep = ", ", na = "NA", eps = TRUE) {
+                     sep = ", ", na = "-", eps = TRUE) {
 
   inner <- list(...)
 
