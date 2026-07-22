@@ -6,8 +6,8 @@
 \usage{
 impute_date(
   x,
-  fill_month = "01",
-  fill_day = "01",
+  fill_month = "12",
+  fill_day = NULL,
   fmt = c("ymd", "dmy", "mdy"),
   sep = NULL
 )
@@ -16,9 +16,13 @@ impute_date(
 \item{x}{Character vector of partial dates or datetimes, e.g.
 \code{c("2025-07-19", "2025-07", "2025", "2026-05-22T15:30:45")}.}
 
-\item{fill_month}{Month to impute when missing. Default \code{"01"}.}
+\item{fill_month}{Month to impute when missing. Default \code{"12"} (the last
+month), following the end-of-period convention.}
 
-\item{fill_day}{Day to impute when missing. Default \code{"01"}.}
+\item{fill_day}{Day to impute when missing. Default \code{NULL}, which fills the
+last day of the resolved month (leap years handled), e.g. \code{"2025-02"}
+becomes \code{"2025-02-28"}. Supply a zero-padded string like \code{"15"} for a
+fixed day instead.}
 
 \item{fmt}{Ordering of the input date components: \code{"ymd"} (default),
 \code{"dmy"}, or \code{"mdy"}.}
@@ -42,8 +46,8 @@ is not checked: fill values can intentionally create dates such as
 required.
 }
 \examples{
-impute_date(c("2025-07-19", "2025-07", "2025", NA))
-impute_date("2025", fill_month = "12", fill_day = "31")
+impute_date(c("2025-07-19", "2025-07", "2025", NA))  # last day / month filled
+impute_date("2025", fill_month = "01", fill_day = "01")  # earliest convention
 impute_date("2025/07")                  # separator auto-detected
 impute_date("07-19-2025", fmt = "mdy")
 impute_date("2026-05-22T15:30:45")      # time stripped

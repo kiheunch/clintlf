@@ -89,11 +89,14 @@ fmt_pval(c(0.051, 0.001), n = 3, alpha = "0.05")
 `impute_date()` imputes missing month and day components of partial date
 strings with varying structures, commonly encountered in international clinical
 datasets. It supports `"ymd"`, `"mdy"`, and `"dmy"` orderings, auto-detects
-separators, and strips time components before imputation.
+separators, and strips time components before imputation. By default a missing
+month fills to `"12"` and a missing day fills to the last day of the resolved
+month (the end-of-period convention); pass `fill_month = "01"`, `fill_day = "01"`
+for the earliest-date convention.
 
 ```{r}
 impute_date(c("2025-07-19", "2025-07", "2025", NA))
-impute_date(c("2025-07-19", "2025-07"), fill_month = "12", fill_day = "31")
+impute_date(c("2025-07-19", "2025-07"), fill_month = "01", fill_day = "01")
 impute_date("2026-05-22T15:30:45")
 impute_date("07-19-2025", fmt = "mdy")
 ```

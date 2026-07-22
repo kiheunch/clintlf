@@ -12,24 +12,28 @@
 #'
 #' @param x Character vector of partial dates or datetimes, e.g.
 #'   `c("2025-07-19", "2025-07", "2025", "2026-05-22T15:30:45")`.
-#' @param fill_month Month to impute when missing. Default `"01"`.
-#' @param fill_day Day to impute when missing. Default `"01"`.
+#' @param fill_month Month to impute when missing. Default `"12"` (the last
+#'   month), following the end-of-period convention.
+#' @param fill_day Day to impute when missing. Default `NULL`, which fills the
+#'   last day of the resolved month (leap years handled), e.g. `"2025-02"`
+#'   becomes `"2025-02-28"`. Supply a zero-padded string like `"15"` for a
+#'   fixed day instead.
 #' @param fmt Ordering of the input date components: `"ymd"` (default),
 #'   `"dmy"`, or `"mdy"`.
 #' @param sep Separator between date components: `"-"`, `"/"`, or `"."`.
 #'   Auto-detected per element when `NULL` (default).
-#' @returns Character vector of complete yyyy-mm-dd dates.
+#' @returns Character vector of complete ISO 8601 (yyyy-mm-dd) dates.
 #' @export
 #' @examples
-#' impute_date(c("2025-07-19", "2025-07", "2025", NA))
-#' impute_date("2025", fill_month = "12", fill_day = "31")
+#' impute_date(c("2025-07-19", "2025-07", "2025", NA))  # last day / month filled
+#' impute_date("2025", fill_month = "01", fill_day = "01")  # earliest convention
 #' impute_date("2025/07")                  # separator auto-detected
-#' impute_date("07-19-2025", fmt = "mdy")
+#' impute_date("07-19-2025", fmt = "mdy")  # mdy ordering input
 #' impute_date("2026-05-22T15:30:45")      # time stripped
 
 impute_date <- function(x,
-                     fill_month = "01",
-                     fill_day   = "01",
+                     fill_month = "12",
+                     fill_day   = NULL,
                      fmt        = c("ymd", "dmy", "mdy"),
                      sep        = NULL) {
 
@@ -41,9 +45,11 @@ impute_date <- function(x,
   stopifnot("fill_month must be a valid month (01-12)" =
               is.character(fill_month) & length(fill_month) == 1 &
               suppressWarnings(as.integer(fill_month)) %in% 1:12)
-  stopifnot("fill_day must be a valid day (01-31)" =
-              is.character(fill_day) & length(fill_day) == 1 &
-              suppressWarnings(as.integer(fill_day)) %in% 1:31)
+  if (!is.null(fill_day)) {
+    stopifnot("fill_day must be a valid day (01-31)" =
+                is.character(fill_day) & length(fill_day) == 1 &
+                suppressWarnings(as.integer(fill_day)) %in% 1:31)
+  }
 
   if (!is.null(sep)) {
     stopifnot("sep must be a single character string" =
@@ -58,7 +64,7 @@ impute_date <- function(x,
   }
 
   fill_month <- pad_zero(fill_month)
-  fill_day   <- pad_zero(fill_day)
+  if (!is.null(fill_day)) fill_day <- pad_zero(fill_day)
 
   # --- apply imputation over vector ---
   out <- vapply(
